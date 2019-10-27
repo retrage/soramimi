@@ -86,6 +86,8 @@ def parse_past_data(soup):
     for title in soup.find_all('h3'):
         if not '月' in title.text or not '日' in title.text:
             continue
+        if '前身' in title.text:
+            continue
         t = title.text
         try:
             month = int(t[:t.index('月')])
@@ -93,13 +95,14 @@ def parse_past_data(soup):
         except:
             print('[!] Date encoding error: {}'.format(t))
         date = datetime.date(year, month, day)
+        # TODO: This will ignore valid table
         sibling = title.find_next_sibling('p')
         if sibling is not None and '放送' in sibling.text:
-            print('[-] {}: No on air p'.format(date.isoformat()))
+            print('[-] {}: No on air'.format(date.isoformat()))
             continue
         sibling = title.find_next_sibling('div')
         if sibling is not None and '放送' in sibling.text:
-            print('[-] {}: No on air div'.format(date.isoformat()))
+            print('[-] {}: No on air'.format(date.isoformat()))
             continue
         anchor = title.find_next('a')
         if anchor is not None and '空耳アワード' in anchor.text:
@@ -129,7 +132,6 @@ def main():
 
     print('[+] Fetching past links...')
     links = fetch_past_links()
-    print('[+] Fetched and parsed past links')
 
     data = []
     for link in links:
